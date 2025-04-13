@@ -6,11 +6,12 @@ A custom background job runner system for Laravel that allows executing PHP clas
 
 - Execute PHP classes as background jobs
 - Cross-platform support (Windows and Unix-based systems)
-- Configurable retry mechanism
+- Configurable retry mechanism with database tracking
 - Comprehensive logging
 - Security through allowed jobs configuration
 - Error handling and reporting
 - Command-line interface
+- Automatic retry processing via scheduler
 
 ## Installation
 
@@ -23,9 +24,19 @@ A custom background job runner system for Laravel that allows executing PHP clas
    ```bash
    php artisan vendor:publish --tag=config
    ```
-4. Make the script executable (Unix-based systems):
+4. Run migrations to create the retry tracking table:
+   ```bash
+   php artisan migrate
+   ```
+   > **Note**: This step is required for the retry mechanism to work. It creates the `background_job_retries` table that tracks failed jobs and their retry attempts.
+
+5. Make the script executable (Unix-based systems):
    ```bash
    chmod +x run-job.php
+   ```
+6. Set up the scheduler in your crontab:
+   ```bash
+   * * * * * cd /path/to/your/project && php artisan schedule:run >> /dev/null 2>&1
    ```
 
 ## Configuration
@@ -81,6 +92,41 @@ php run-job.php SampleJob process "param1,param2,param3"
 
 Note: The script automatically adds the `App\Jobs\` namespace prefix to the class name.
 
+### Retry Mechanism
+
+The system includes a robust retry mechanism that:
+
+1. Automatically tracks failed jobs in the database
+2. Retries failed jobs based on configuration
+3. Provides detailed status tracking
+4. Survives server restarts
+
+#### How Retries Work
+
+1. When a job fails:
+   - A retry record is created in the database
+   - The next attempt is scheduled based on the delay configuration
+   - Status is set to 'pending'
+
+2. The scheduler (running every minute):
+   - Checks for pending retries that are due
+   - Executes each retry in a separate process
+   - Updates the retry status accordingly
+
+3. Retry Statuses:
+   - `pending`: Waiting to be retried
+   - `running`: Currently being executed
+   - `completed`: Successfully completed
+   - `failed`: Failed after all attempts
+
+#### Monitoring Retries
+
+You can monitor retries through:
+1. The database `background_job_retries` table
+2. Log files in `storage/logs/`:
+   - `background_jobs.log` for general job status
+   - `background_jobs_errors.log` for error information
+
 ### Creating a New Job
 
 1. Create a new class in `app/Jobs/`
@@ -101,33 +147,30 @@ class SampleJob
 }
 ```
 
-### Monitoring Jobs
-
-Check the log files in `storage/logs/`:
-- `background_jobs.log` for general job status
-- `background_jobs_errors.log` for error information
-
 ## Security
 
 The system includes several security measures:
 - Only pre-approved classes and methods can be executed
 - Input parameters are validated
 - Comprehensive error logging
+- Database-backed retry tracking
 
 ## Advanced Features
 
-### Retry Mechanism
+### Retry Configuration
 
 Failed jobs are automatically retried based on configuration:
 - Maximum number of attempts
 - Delay between retries
-- Exponential backoff
+- Status tracking in database
+- Automatic processing via scheduler
 
 ### Error Handling
 
 - All exceptions are caught and logged
 - Detailed error information is stored
-- Failed jobs can be retried automatically
+- Failed jobs are automatically retried
+- Comprehensive error tracking in database
 
 ## Limitations
 

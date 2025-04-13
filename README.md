@@ -13,6 +13,7 @@ A custom background job runner system for Laravel that allows executing PHP clas
 - Command-line interface
 - Automatic retry processing via scheduler
 - Web-based dashboard for job management
+- Job queue management with status tracking
 
 ## Installation
 
@@ -191,13 +192,4 @@ Failed jobs are automatically retried based on configuration:
 
 ## Limitations
 
-- No built-in job queue management
 - No job prioritization
-
-## Contributing
-
-Feel free to submit issues and enhancement requests.
-
-## License
-
-This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

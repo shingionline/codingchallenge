@@ -17,28 +17,29 @@ A custom background job runner system for Laravel that allows executing PHP clas
 
 ## Installation
 
-1. Clone the repository
-2. Install dependencies:
+1. Install dependencies
    ```bash
+   git clone https://github.com/shingionline/codingchallenge.git
+   cd codingchallenge
    composer install
    ```
-3. Copy the configuration file:
+2. Copy the configuration file
    ```bash
    php artisan vendor:publish --tag=config
    ```
-4. Run migrations to create the retry tracking table:
+3. Run migrations to create the retry tracking table
    ```bash
    php artisan migrate
    ```
    > **Note**: This step is required for the retry mechanism to work. It creates the `background_job_retries` table that tracks failed jobs and their retry attempts.
 
-5. Make the script executable (Unix-based systems):
+4. Make the script executable (Unix-based systems)
    ```bash
    chmod +x run-job.php
    ```
-6. Set up the scheduler in your crontab:
+5. Set up the scheduler in your crontab
    ```bash
-   * * * * * cd /path/to/your/project && php artisan schedule:run >> /dev/null 2>&1
+   * * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1
    ```
 
 ## Configuration

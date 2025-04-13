@@ -93,11 +93,14 @@ if ($success) {
 #### Using the Command Line
 
 ```bash
-# Basic usage with a single parameter
-php run-job.php SampleJob process "param1"
+# Usage format
+php run-job.php className method "param1"
 
-# With multiple parameters
+# Example successful job
 php run-job.php SampleJob process "param1,param2,param3"
+
+# Example failed job
+php run-job.php TestFailedJob process "param1,param2,param3"
 
 # On Unix-based systems (if made executable)
 ./run-job.php SampleJob process "param1,param2"

@@ -63,7 +63,12 @@ Example configuration:
 
 ### Web Dashboard
 
-Access the web dashboard at `/` to:
+Start the development server:
+```bash
+php artisan serve
+```
+
+Access the web dashboard at http://127.0.0.1:8000 to:
 - View all jobs and their statuses
 - Monitor job statistics
 - Retry failed jobs
@@ -133,7 +138,7 @@ The system includes a robust retry mechanism that:
 #### Monitoring Retries
 
 You can monitor retries through:
-1. The web dashboard at `/`
+1. The web dashboard at http://127.0.0.1:8000
 2. The database `background_job_retries` table
 3. Log files in `storage/logs/`:
    - `background_jobs.log` for general job status

@@ -13,21 +13,10 @@ class TestFailedJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $attemptCount = 0;
-
-    public function __construct()
-    {
-        $this->attemptCount = 0;
-    }
-
     public function process()
     {
-        $this->attemptCount++;
-        
-        Log::channel('background_jobs')->info("TestFailedJob attempt {$this->attemptCount} started");
-        
-        // Always fail, regardless of attempt number
-        Log::channel('background_jobs')->error("TestFailedJob attempt {$this->attemptCount} failed");
-        throw new \Exception("TestFailedJob failed on attempt {$this->attemptCount}");
+        Log::channel('background_jobs')->info("TestFailedJob started");
+        Log::channel('background_jobs')->error("TestFailedJob failed");
+        throw new \Exception("TestFailedJob failed");
     }
 } 

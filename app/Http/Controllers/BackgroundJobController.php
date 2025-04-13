@@ -10,23 +10,23 @@ class BackgroundJobController extends Controller
 {
     public function index()
     {
-        $retries = BackgroundJobRetry::orderBy('created_at', 'desc')
-            ->paginate(10);
-
+        $retries = BackgroundJobRetry::orderBy('created_at', 'desc')->paginate(10);
+        
         $stats = [
             'total' => BackgroundJobRetry::count(),
-            'running' => BackgroundJobRetry::where('status', 'running')->count(),
             'completed' => BackgroundJobRetry::where('status', 'completed')->count(),
             'failed' => BackgroundJobRetry::where('status', 'failed')->count(),
+            'running' => BackgroundJobRetry::where('status', 'running')->count(),
+            'cancelled' => BackgroundJobRetry::where('status', 'cancelled')->count(),
         ];
 
-        return view('background_jobs.index', compact('retries', 'stats'));
+        return view('background-jobs.index', compact('retries', 'stats'));
     }
 
     public function show($id)
     {
         $retry = BackgroundJobRetry::findOrFail($id);
-        return view('background_jobs.show', compact('retry'));
+        return view('background-jobs.show', compact('retry'));
     }
 
     public function logs()
@@ -34,39 +34,44 @@ class BackgroundJobController extends Controller
         $mainLogPath = storage_path('logs/background_jobs.log');
         $errorLogPath = storage_path('logs/background_jobs_errors.log');
 
-        $mainLog = file_exists($mainLogPath) ? file_get_contents($mainLogPath) : 'No logs available';
-        $errorLog = file_exists($errorLogPath) ? file_get_contents($errorLogPath) : 'No error logs available';
+        $mainLog = file_exists($mainLogPath) ? file_get_contents($mainLogPath) : 'No logs found';
+        $errorLog = file_exists($errorLogPath) ? file_get_contents($errorLogPath) : 'No error logs found';
 
-        // Format the logs for better readability
-        $mainLog = $this->formatLog($mainLog);
-        $errorLog = $this->formatLog($errorLog);
-
-        return view('background_jobs.logs', compact('mainLog', 'errorLog'));
+        return view('background-jobs.logs', [
+            'mainLog' => $this->formatLog($mainLog),
+            'errorLog' => $this->formatLog($errorLog)
+        ]);
     }
 
-    public function retry(BackgroundJobRetry $retry)
+    public function retry($id)
     {
-        if ($retry->status === 'failed' && $retry->attempt < $retry->max_attempts) {
-            $retry->update([
-                'attempt' => $retry->attempt + 1,
-                'next_attempt_at' => now(),
-                'status' => 'pending'
-            ]);
-
-            return redirect()->back()->with('success', 'Job has been scheduled for retry');
+        $retry = BackgroundJobRetry::findOrFail($id);
+        
+        if ($retry->attempt >= $retry->max_attempts) {
+            return redirect()->back()->with('error', 'Maximum attempts reached. Cannot retry this job.');
         }
 
-        return redirect()->back()->with('error', 'Job cannot be retried');
+        $retry->update([
+            'status' => 'running',
+            'attempt' => $retry->attempt + 1,
+            'next_attempt_at' => now()->addSeconds($retry->delay_seconds)
+        ]);
+
+        return redirect()->back();
     }
 
-    public function cancel(BackgroundJobRetry $retry)
+    public function cancel($id)
     {
+        $retry = BackgroundJobRetry::findOrFail($id);
+        
         if ($retry->status === 'running') {
-            $retry->markAsCancelled();
-            return redirect()->back()->with('success', 'Job has been cancelled');
+            $retry->update([
+                'status' => 'cancelled',
+                'error' => 'Job was cancelled by user'
+            ]);
         }
 
-        return redirect()->back()->with('error', 'Only running jobs can be cancelled');
+        return redirect('/');
     }
 
     private function formatLog($log)
@@ -77,16 +82,11 @@ class BackgroundJobController extends Controller
         foreach ($lines as $line) {
             if (empty(trim($line))) continue;
 
-            // Check if the line contains JSON
+            // Check if line contains JSON
             if (preg_match('/\{.*\}/', $line, $matches)) {
-                try {
-                    $json = json_decode($matches[0], true);
-                    if ($json !== null) {
-                        $formattedLines[] = json_encode($json, JSON_PRETTY_PRINT);
-                        continue;
-                    }
-                } catch (\Exception $e) {
-                    // Not valid JSON, continue with normal formatting
+                $json = json_decode($matches[0], true);
+                if ($json) {
+                    $line = str_replace($matches[0], json_encode($json, JSON_PRETTY_PRINT), $line);
                 }
             }
 

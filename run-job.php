@@ -6,101 +6,72 @@ require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
 $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
-// Ensure log directory exists and is writable
-$logDir = storage_path('logs');
-if (!is_dir($logDir)) {
-    mkdir($logDir, 0755, true);
+use App\Models\BackgroundJobRetry;
+use Illuminate\Support\Facades\Log;
+
+if ($argc < 3) {
+    die("Usage: php run-job.php ClassName methodName \"param1,param2\"\n");
 }
 
-// Ensure log files exist and are writable
-$logFiles = [
-    'background_jobs.log',
-    'background_jobs_errors.log'
-];
-
-foreach ($logFiles as $logFile) {
-    $logPath = $logDir . '/' . $logFile;
-    if (!file_exists($logPath)) {
-        touch($logPath);
-        chmod($logPath, 0666);
-    }
-}
-
-// Get command line arguments
-$className = $argv[1] ?? null;
-$method = $argv[2] ?? null;
+$className = $argv[1];
+$method = $argv[2];
 $paramsStr = $argv[3] ?? '';
-$retryId = $argv[4] ?? null;
 
-if (!$className || !$method) {
-    echo "Usage: php run-job.php ClassName methodName \"param1,param2\" [retry_id]\n";
-    exit(1);
-}
+// Add namespace prefix
+$class = "App\\Jobs\\{$className}";
+
+// Parse parameters
+$params = array_map('trim', explode(',', $paramsStr));
+
+// Create job record
+$retry = BackgroundJobRetry::create([
+    'class' => $class,
+    'method' => $method,
+    'params' => json_encode($params),
+    'attempt' => 1,
+    'max_attempts' => 3,
+    'delay_seconds' => 5,
+    'next_attempt_at' => now()->addSeconds(5),
+    'status' => 'running'
+]);
 
 try {
-    // Add namespace prefix
-    $class = "App\\Jobs\\{$className}";
-
-    // Validate the job is allowed
-    $allowedJobs = config('background_jobs.allowed_jobs');
-    if (!isset($allowedJobs[$class]) || !in_array($method, $allowedJobs[$class]['allowed_methods'])) {
-        echo "Error: Job {$className}::{$method} is not allowed.\n";
-        exit(1);
-    }
-
-    // Parse parameters from comma-separated string
-    $params = [];
-    if (!empty($paramsStr)) {
-        $params = array_map('trim', explode(',', $paramsStr));
-    }
-
-    // Log job start
-    \Illuminate\Support\Facades\Log::channel('background_jobs')->info('Job started', [
-        'timestamp' => now(),
+    // Execute the job
+    $job = new $class();
+    $job->$method(...$params);
+    
+    // Job succeeded
+    $retry->update(['status' => 'completed']);
+    Log::channel('background_jobs')->info("Job completed successfully", [
+        'class' => $class,
+        'method' => $method,
+        'params' => $params
+    ]);
+} catch (\Exception $e) {
+    // Job failed - only mark as failed if we've reached max attempts
+    $status = $retry->attempt >= $retry->max_attempts ? 'failed' : 'running';
+    
+    $retry->update([
+        'status' => $status,
+        'error' => $e->getMessage(),
+        'next_attempt_at' => now()->addSeconds($retry->delay_seconds)
+    ]);
+    
+    Log::channel('background_jobs_errors')->error("Job failed", [
         'class' => $class,
         'method' => $method,
         'params' => $params,
-        'status' => 'running'
-    ]);
-
-    // Create command array with JSON-encoded parameters
-    $command = [
-        'php',
-        __DIR__.'/artisan',
-        'background-job:execute',
-        escapeshellarg($class),
-        escapeshellarg($method),
-        escapeshellarg(json_encode($params)),
-        $retryId ? escapeshellarg($retryId) : ''
-    ];
-
-    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-        // Windows
-        $process = new \Symfony\Component\Process\Process($command);
-        $process->setOptions(['create_new_console' => true]);
-        $process->start();
-    } else {
-        // Unix-based systems
-        $command = implode(' ', $command) . ' > /dev/null 2>&1 &';
-        $process = \Symfony\Component\Process\Process::fromShellCommandline($command);
-        $process->start();
-    }
-
-    // Wait a moment to ensure the process starts
-    usleep(100000); // 100ms delay
-
-    echo "Job {$className}::{$method} started successfully.\n";
-    exit(0);
-
-} catch (\Exception $e) {
-    \Illuminate\Support\Facades\Log::channel('background_jobs_errors')->error('Job error', [
-        'timestamp' => now(),
-        'class' => $class ?? $className,
-        'method' => $method,
         'error' => $e->getMessage(),
-        'trace' => $e->getTraceAsString()
+        'attempt' => $retry->attempt,
+        'max_attempts' => $retry->max_attempts
     ]);
-
-    echo "Error: " . $e->getMessage() . "\n";
+    
+    echo "Job failed: " . $e->getMessage() . "\n";
+    if ($status === 'running') {
+        echo "Job will be retried when you run 'php artisan background-job:process-retries'.\n";
+        echo "Current attempt: {$retry->attempt} of {$retry->max_attempts}\n";
+    } else {
+        echo "Job has reached maximum attempts and will not be retried.\n";
+    }
     exit(1);
 } 

@@ -23,35 +23,43 @@
                     @endif
 
                     <div class="row mb-4">
-                        <div class="col-md-3">
+                        <div class="col">
                             <div class="card bg-primary text-white">
                                 <div class="card-body">
-                                    <h6 class="card-title">Total Jobs</h6>
-                                    <h3 class="card-text">{{ $stats['total'] }}</h3>
+                                    <h5 class="card-title">Total Jobs</h5>
+                                    <p class="card-text display-4">{{ $stats['total'] }}</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col">
                             <div class="card bg-success text-white">
                                 <div class="card-body">
-                                    <h6 class="card-title">Completed</h6>
-                                    <h3 class="card-text">{{ $stats['completed'] }}</h3>
+                                    <h5 class="card-title">Completed</h5>
+                                    <p class="card-text display-4">{{ $stats['completed'] }}</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col">
                             <div class="card bg-danger text-white">
                                 <div class="card-body">
-                                    <h6 class="card-title">Failed</h6>
-                                    <h3 class="card-text">{{ $stats['failed'] }}</h3>
+                                    <h5 class="card-title">Failed</h5>
+                                    <p class="card-text display-4">{{ $stats['failed'] }}</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col">
                             <div class="card bg-warning text-white">
                                 <div class="card-body">
-                                    <h6 class="card-title">Running</h6>
-                                    <h3 class="card-text">{{ $stats['running'] }}</h3>
+                                    <h5 class="card-title">Running</h5>
+                                    <p class="card-text display-4">{{ $stats['running'] }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card bg-secondary text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title">Cancelled</h5>
+                                    <p class="card-text display-4">{{ $stats['cancelled'] }}</p>
                                 </div>
                             </div>
                         </div>

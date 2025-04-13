@@ -20,13 +20,13 @@ class BackgroundJobController extends Controller
             'cancelled' => BackgroundJobRetry::where('status', 'cancelled')->count(),
         ];
 
-        return view('background-jobs.index', compact('retries', 'stats'));
+        return view('index', compact('retries', 'stats'));
     }
 
     public function show($id)
     {
         $retry = BackgroundJobRetry::findOrFail($id);
-        return view('background-jobs.show', compact('retry'));
+        return view('show', compact('retry'));
     }
 
     public function logs()
@@ -37,7 +37,7 @@ class BackgroundJobController extends Controller
         $mainLog = file_exists($mainLogPath) ? file_get_contents($mainLogPath) : 'No logs found';
         $errorLog = file_exists($errorLogPath) ? file_get_contents($errorLogPath) : 'No error logs found';
 
-        return view('background-jobs.logs', [
+        return view('logs', [
             'mainLog' => $this->formatLog($mainLog),
             'errorLog' => $this->formatLog($errorLog)
         ]);

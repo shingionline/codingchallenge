@@ -110,14 +110,7 @@ Note: The script automatically adds the `App\Jobs\` namespace prefix to the clas
 
 ### Retry Mechanism
 
-The system includes a robust retry mechanism that:
-
-1. Automatically tracks failed jobs in the database
-2. Retries failed jobs based on configuration
-3. Provides detailed status tracking
-4. Survives server restarts
-
-#### How Retries Work
+The system includes a robust retry mechanism that automatically handles failed jobs:
 
 1. When a job fails:
    - A retry record is created in the database
@@ -129,21 +122,19 @@ The system includes a robust retry mechanism that:
    - Executes each retry in a separate process
    - Updates the retry status accordingly
 
-3. Retry Statuses:
+3. Job Statuses:
    - `pending`: Waiting to be retried
    - `running`: Currently being executed
    - `completed`: Successfully completed
    - `failed`: Failed after all attempts
    - `cancelled`: Manually cancelled by user
 
-#### Monitoring Retries
-
-You can monitor retries through:
-1. The web dashboard
-2. The database `background_job_retries` table
-3. Log files in `storage/logs/`:
-   - `background_jobs.log` for general job status
-   - `background_jobs_errors.log` for error information
+4. Monitoring:
+   - View job statuses and statistics in the web dashboard
+   - Check the `background_job_retries` table in the database
+   - Review logs in `storage/logs/`:
+     - `background_jobs.log` for general job status
+     - `background_jobs_errors.log` for error information
 
 ### Creating a New Job
 
@@ -174,14 +165,6 @@ The system includes several security measures:
 - Database-backed retry tracking
 
 ## Advanced Features
-
-### Retry Configuration
-
-Failed jobs are automatically retried based on configuration:
-- Maximum number of attempts
-- Delay between retries
-- Status tracking in database
-- Automatic processing via scheduler
 
 ### Error Handling
 

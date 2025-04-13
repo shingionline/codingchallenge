@@ -12,6 +12,7 @@ A custom background job runner system for Laravel that allows executing PHP clas
 - Error handling and reporting
 - Command-line interface
 - Automatic retry processing via scheduler
+- Web-based dashboard for job management
 
 ## Installation
 
@@ -59,6 +60,15 @@ Example configuration:
 ```
 
 ## Usage
+
+### Web Dashboard
+
+Access the web dashboard at `/` to:
+- View all jobs and their statuses
+- Monitor job statistics
+- Retry failed jobs
+- Cancel running jobs
+- View detailed job logs
 
 ### Running a Background Job
 
@@ -118,12 +128,14 @@ The system includes a robust retry mechanism that:
    - `running`: Currently being executed
    - `completed`: Successfully completed
    - `failed`: Failed after all attempts
+   - `cancelled`: Manually cancelled by user
 
 #### Monitoring Retries
 
 You can monitor retries through:
-1. The database `background_job_retries` table
-2. Log files in `storage/logs/`:
+1. The web dashboard at `/`
+2. The database `background_job_retries` table
+3. Log files in `storage/logs/`:
    - `background_jobs.log` for general job status
    - `background_jobs_errors.log` for error information
 
@@ -176,8 +188,6 @@ Failed jobs are automatically retried based on configuration:
 
 - No built-in job queue management
 - No job prioritization
-- No job cancellation mechanism
-- No web-based dashboard
 
 ## Contributing
 

@@ -98,17 +98,11 @@
                                         <td>{{ $retry->created_at }}</td>
                                         <td>
                                             <a href="/{{ $retry->id }}" class="btn btn-sm btn-info">View</a>
-                                            @if($retry->status === 'failed' && $retry->attempt < $retry->max_attempts)
-                                                <form action="/{{ $retry->id }}/retry" method="POST" class="d-inline">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-sm btn-warning">Retry</button>
-                                                </form>
+                                            @if(($retry->status === 'failed' || $retry->status === 'running') && $retry->attempt < $retry->max_attempts)
+                                                <a href="/{{ $retry->id }}/retry" class="btn btn-sm btn-warning">Retry</a>
                                             @endif
                                             @if($retry->status === 'running')
-                                                <form action="/{{ $retry->id }}/cancel" method="POST" class="d-inline">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
-                                                </form>
+                                                <a href="/{{ $retry->id }}/cancel" class="btn btn-sm btn-danger">Cancel</a>
                                             @endif
                                         </td>
                                     </tr>

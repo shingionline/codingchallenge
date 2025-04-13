@@ -55,12 +55,35 @@ class BackgroundJobController extends Controller
             return redirect('/');
         }
 
-        // Execute the retry command
-        $command = sprintf(
-            'php artisan retry %d > /dev/null 2>&1 &',
-            $retry->id
-        );
-        exec($command);
+        // Update the job status and attempt count
+        $retry->update([
+            'status' => 'running',
+            'attempt' => $retry->attempt + 1,
+            'next_attempt_at' => now()
+        ]);
+
+        try {
+            $class = $retry->class;
+            $method = $retry->method;
+            $params = json_decode($retry->params, true);
+            
+            $instance = app($class);
+            $instance->$method(...$params);
+            
+            $retry->update(['status' => 'completed']);
+        } catch (\Exception $e) {
+            if ($retry->attempt >= $retry->max_attempts) {
+                $retry->update([
+                    'status' => 'failed',
+                    'error' => $e->getMessage()
+                ]);
+            } else {
+                $retry->update([
+                    'status' => 'running',
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
 
         return redirect('/');
     }

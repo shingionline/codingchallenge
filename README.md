@@ -138,7 +138,7 @@ The system includes a robust retry mechanism that:
 #### Monitoring Retries
 
 You can monitor retries through:
-1. The web dashboard at http://127.0.0.1:8000
+1. The web dashboard
 2. The database `background_job_retries` table
 3. Log files in `storage/logs/`:
    - `background_jobs.log` for general job status

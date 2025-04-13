@@ -10,6 +10,7 @@ A custom background job runner system for Laravel that allows executing PHP clas
 - Comprehensive logging
 - Security through allowed jobs configuration
 - Error handling and reporting
+- Command-line interface
 
 ## Installation
 
@@ -21,6 +22,10 @@ A custom background job runner system for Laravel that allows executing PHP clas
 3. Copy the configuration file:
    ```bash
    php artisan vendor:publish --tag=config
+   ```
+4. Make the script executable (Unix-based systems):
+   ```bash
+   chmod +x run-job.php
    ```
 
 ## Configuration
@@ -46,7 +51,7 @@ Example configuration:
 
 ### Running a Background Job
 
-Use the `runBackgroundJob` helper function:
+#### Using the Helper Function
 
 ```php
 use App\Jobs\SampleJob;
@@ -60,6 +65,21 @@ if ($success) {
     // Failed to start job
 }
 ```
+
+#### Using the Command Line
+
+```bash
+# Basic usage with a single parameter
+php run-job.php SampleJob process "param1"
+
+# With multiple parameters
+php run-job.php SampleJob process "param1,param2,param3"
+
+# On Unix-based systems (if made executable)
+./run-job.php SampleJob process "param1,param2"
+```
+
+Note: The script automatically adds the `App\Jobs\` namespace prefix to the class name.
 
 ### Creating a New Job
 
@@ -115,3 +135,11 @@ Failed jobs are automatically retried based on configuration:
 - No job prioritization
 - No job cancellation mechanism
 - No web-based dashboard
+
+## Contributing
+
+Feel free to submit issues and enhancement requests.
+
+## License
+
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

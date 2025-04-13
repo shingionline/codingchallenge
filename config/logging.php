@@ -31,10 +31,7 @@ return [
     |
     */
 
-    'deprecations' => [
-        'channel' => env('LOG_DEPRECATIONS_CHANNEL', 'null'),
-        'trace' => env('LOG_DEPRECATIONS_TRACE', false),
-    ],
+    'deprecations' => env('LOG_DEPRECATIONS_CHANNEL', 'null'),
 
     /*
     |--------------------------------------------------------------------------
@@ -54,7 +51,7 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', env('LOG_STACK', 'single')),
+            'channels' => ['single'],
             'ignore_exceptions' => false,
         ],
 
@@ -125,6 +122,20 @@ return [
 
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
+        ],
+
+        'background_jobs' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/background_jobs.log'),
+            'level' => 'info',
+            'permission' => 0666,
+        ],
+
+        'background_jobs_errors' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/background_jobs_errors.log'),
+            'level' => 'error',
+            'permission' => 0666,
         ],
 
     ],

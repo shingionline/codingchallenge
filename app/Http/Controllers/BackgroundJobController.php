@@ -48,16 +48,21 @@ class BackgroundJobController extends Controller
         $retry = BackgroundJobRetry::findOrFail($id);
         
         if ($retry->attempt >= $retry->max_attempts) {
-            return redirect()->back()->with('error', 'Maximum attempts reached. Cannot retry this job.');
+            $retry->update([
+                'status' => 'failed',
+                'error' => 'Maximum number of attempts reached'
+            ]);
+            return redirect('/');
         }
 
-        $retry->update([
-            'status' => 'running',
-            'attempt' => $retry->attempt + 1,
-            'next_attempt_at' => now()->addSeconds($retry->delay_seconds)
-        ]);
+        // Execute the retry command
+        $command = sprintf(
+            'php artisan retry %d > /dev/null 2>&1 &',
+            $retry->id
+        );
+        exec($command);
 
-        return redirect()->back();
+        return redirect('/');
     }
 
     public function cancel($id)

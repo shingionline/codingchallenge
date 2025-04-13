@@ -1,11 +1,7 @@
-[2025-04-13 16:49:56] local.INFO: TestFailedJob started  
-[2025-04-13 16:49:56] local.ERROR: TestFailedJob failed  
-[2025-04-13 16:51:27] local.INFO: TestFailedJob started  
-[2025-04-13 16:51:27] local.ERROR: TestFailedJob failed  
-[2025-04-13 16:51:48] local.INFO: TestFailedJob started  
-[2025-04-13 16:51:48] local.ERROR: TestFailedJob failed  
-[2025-04-13 16:53:10] local.INFO: Job completed successfully {"class":"App\\Jobs\\SampleJob","method":"process","params":["param1","param2","param3"]} 
-[2025-04-13 16:54:18] local.INFO: TestFailedJob started  
-[2025-04-13 16:54:18] local.ERROR: TestFailedJob failed  
-[2025-04-13 17:55:58] local.INFO: TestFailedJob started  
-[2025-04-13 17:55:58] local.ERROR: TestFailedJob failed  
+[2025-04-13 18:34:58] local.INFO: TestFailedJob started  
+[2025-04-13 18:34:58] local.ERROR: TestFailedJob failed  
+[2025-04-13 18:35:55] local.INFO: TestFailedJob started  
+[2025-04-13 18:35:55] local.ERROR: TestFailedJob failed  
+[2025-04-13 18:35:56] local.INFO: TestFailedJob started  
+[2025-04-13 18:35:56] local.ERROR: TestFailedJob failed  
+[2025-04-13 18:36:28] local.INFO: Job completed successfully {"class":"App\\Jobs\\SampleJob","method":"process","params":["param1","param2","param3"]} 

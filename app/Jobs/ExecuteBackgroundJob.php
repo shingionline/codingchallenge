@@ -2,18 +2,11 @@
 
 namespace App\Jobs;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use App\Models\BackgroundJob;
 
-class ExecuteBackgroundJob implements ShouldQueue
+class ExecuteBackgroundJob
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
     protected $class;
     protected $method;
     protected $params;
@@ -56,6 +49,7 @@ class ExecuteBackgroundJob implements ShouldQueue
                 'result' => $result
             ]);
 
+            return $result;
         } catch (\Exception $e) {
             $job->update([
                 'status' => 'failed',

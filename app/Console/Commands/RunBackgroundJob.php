@@ -34,24 +34,25 @@ class RunBackgroundJob extends Command
         }
 
         try {
-            // Dispatch the job to the queue
-            ExecuteBackgroundJob::dispatch($class, $method, $params);
+            // Execute the job directly
+            $job = new ExecuteBackgroundJob($class, $method, $params);
+            $result = $job->handle();
             
-            Log::info('Job dispatched successfully', [
+            Log::info('Job executed successfully', [
                 'class' => $class,
                 'method' => $method
             ]);
 
-            $this->info("Job dispatched successfully");
+            $this->info("Job executed successfully");
             return 0;
         } catch (\Exception $e) {
-            Log::error('Failed to dispatch job', [
+            Log::error('Failed to execute job', [
                 'class' => $class,
                 'method' => $method,
                 'error' => $e->getMessage()
             ]);
 
-            $this->error("Failed to dispatch job: " . $e->getMessage());
+            $this->error("Failed to execute job: " . $e->getMessage());
             return 1;
         }
     }

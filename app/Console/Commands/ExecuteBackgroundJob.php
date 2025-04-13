@@ -22,8 +22,20 @@ class ExecuteBackgroundJob extends Command
             // If this is a retry, find the existing record
             if ($retryId) {
                 $retry = BackgroundJobRetry::findOrFail($retryId);
+                
+                // Check if we've reached max attempts
+                if ($retry->attempt >= $retry->max_attempts) {
+                    $retry->update([
+                        'status' => 'failed',
+                        'error' => 'Maximum number of attempts reached',
+                        'updated_at' => now()
+                    ]);
+                    return 1;
+                }
+
                 $retry->update([
                     'status' => 'running',
+                    'attempt' => $retry->attempt + 1,
                     'updated_at' => now()
                 ]);
             } else {
@@ -46,7 +58,8 @@ class ExecuteBackgroundJob extends Command
                 'method' => $method,
                 'params' => $params,
                 'retry_id' => $retry->id,
-                'attempt' => $retry->attempt
+                'attempt' => $retry->attempt,
+                'max_attempts' => $retry->max_attempts
             ]);
 
             // Ensure params is an array
@@ -77,23 +90,32 @@ class ExecuteBackgroundJob extends Command
             ]);
 
             if (isset($retry)) {
-                if ($retry->attempt < $retry->max_attempts) {
+                // Check if we've reached max attempts
+                if ($retry->attempt >= $retry->max_attempts) {
                     $retry->update([
-                        'attempt' => $retry->attempt + 1,
+                        'status' => 'failed',
+                        'error' => $e->getMessage(),
+                        'updated_at' => now()
+                    ]);
+                    
+                    Log::channel('background_jobs_errors')->error('Job failed permanently - max attempts reached', [
+                        'retry_id' => $retry->id,
+                        'attempt' => $retry->attempt,
+                        'max_attempts' => $retry->max_attempts,
+                        'error' => $e->getMessage()
+                    ]);
+                } else {
+                    $retry->update([
                         'next_attempt_at' => now()->addSeconds($retry->delay_seconds),
                         'status' => 'running',
-                        'error' => $e->getMessage()
+                        'error' => $e->getMessage(),
+                        'updated_at' => now()
                     ]);
 
                     Log::channel('background_jobs')->info('Job retry scheduled', [
                         'retry_id' => $retry->id,
                         'next_attempt' => $retry->attempt + 1,
                         'next_attempt_at' => $retry->next_attempt_at
-                    ]);
-                } else {
-                    $retry->update([
-                        'status' => 'failed',
-                        'error' => $e->getMessage()
                     ]);
                 }
             }

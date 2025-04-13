@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\BackgroundJobRetry;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
 
 class RetryJob extends Command
 {

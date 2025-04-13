@@ -11,7 +11,13 @@ return [
     |
     */
     'allowed_jobs' => [
+        App\Jobs\TestJob::class => [
+            'allowed_methods' => ['process']
+        ],
         'App\Jobs\SampleJob' => ['allowed_methods' => ['process']],
+        'App\Jobs\TestFailedJob' => [
+            'allowed_methods' => ['process'],
+        ],
     ],
 
     /*
@@ -24,7 +30,7 @@ return [
     */
     'retry' => [
         'max_attempts' => 3,
-        'delay_seconds' => 60,
+        'delay_seconds' => 5,
     ],
 
     /*

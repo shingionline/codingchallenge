@@ -41,6 +41,14 @@ class BackgroundJobRetry extends Model
         ]);
     }
 
+    public function markAsCancelled()
+    {
+        $this->update([
+            'status' => 'cancelled',
+            'error' => 'Job was cancelled by user'
+        ]);
+    }
+
     public function scheduleNextAttempt()
     {
         $this->update([

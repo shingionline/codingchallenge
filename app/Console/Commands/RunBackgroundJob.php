@@ -4,8 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-use Symfony\Component\Process\Process;
-use Symfony\Component\Process\Exception\ProcessFailedException;
+use App\Jobs\ExecuteBackgroundJob;
 
 class RunBackgroundJob extends Command
 {
@@ -18,64 +17,42 @@ class RunBackgroundJob extends Command
         $method = $this->argument('method');
         $params = $this->argument('params') ? json_decode($this->argument('params'), true) : [];
 
-        // Validate the job is allowed
-        if (!$this->isJobAllowed($class, $method)) {
-            $this->error("Job {$class}::{$method} is not allowed.");
+        Log::info('Running background job', [
+            'class' => $class,
+            'method' => $method,
+            'params' => $params
+        ]);
+
+        if (!class_exists($class)) {
+            $this->error("Class {$class} does not exist");
+            return 1;
+        }
+
+        if (!method_exists($class, $method)) {
+            $this->error("Method {$method} does not exist in class {$class}");
             return 1;
         }
 
         try {
-            $this->logJobStart($class, $method, $params);
-
-            // Create a new process
-            $process = new Process([
-                'php',
-                base_path('artisan'),
-                'background-job:execute',
-                $class,
-                $method,
-                json_encode($params)
+            // Dispatch the job to the queue
+            ExecuteBackgroundJob::dispatch($class, $method, $params);
+            
+            Log::info('Job dispatched successfully', [
+                'class' => $class,
+                'method' => $method
             ]);
 
-            // Run the process in the background
-            $process->start();
-
-            $this->info("Job {$class}::{$method} started successfully.");
+            $this->info("Job dispatched successfully");
             return 0;
-
         } catch (\Exception $e) {
-            $this->logError($class, $method, $e);
-            $this->error("Failed to start job: " . $e->getMessage());
+            Log::error('Failed to dispatch job', [
+                'class' => $class,
+                'method' => $method,
+                'error' => $e->getMessage()
+            ]);
+
+            $this->error("Failed to dispatch job: " . $e->getMessage());
             return 1;
         }
-    }
-
-    protected function isJobAllowed($class, $method)
-    {
-        $allowedJobs = config('background-jobs.allowed_jobs');
-        return isset($allowedJobs[$class]) && 
-               in_array($method, $allowedJobs[$class]['allowed_methods']);
-    }
-
-    protected function logJobStart($class, $method, $params)
-    {
-        Log::channel('background_jobs')->info('Job started', [
-            'timestamp' => now(),
-            'class' => $class,
-            'method' => $method,
-            'params' => $params,
-            'status' => 'running'
-        ]);
-    }
-
-    protected function logError($class, $method, $exception)
-    {
-        Log::channel('background_jobs_errors')->error('Job error', [
-            'timestamp' => now(),
-            'class' => $class,
-            'method' => $method,
-            'error' => $exception->getMessage(),
-            'trace' => $exception->getTraceAsString()
-        ]);
     }
 } 

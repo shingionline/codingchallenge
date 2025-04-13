@@ -30,9 +30,10 @@ foreach ($logFiles as $logFile) {
 $className = $argv[1] ?? null;
 $method = $argv[2] ?? null;
 $paramsStr = $argv[3] ?? '';
+$retryId = $argv[4] ?? null;
 
 if (!$className || !$method) {
-    echo "Usage: php run-job.php ClassName methodName \"param1,param2\"\n";
+    echo "Usage: php run-job.php ClassName methodName \"param1,param2\" [retry_id]\n";
     exit(1);
 }
 
@@ -41,7 +42,7 @@ try {
     $class = "App\\Jobs\\{$className}";
 
     // Validate the job is allowed
-    $allowedJobs = config('background-jobs.allowed_jobs');
+    $allowedJobs = config('background_jobs.allowed_jobs');
     if (!isset($allowedJobs[$class]) || !in_array($method, $allowedJobs[$class]['allowed_methods'])) {
         echo "Error: Job {$className}::{$method} is not allowed.\n";
         exit(1);
@@ -62,27 +63,32 @@ try {
         'status' => 'running'
     ]);
 
-    // Create command array
+    // Create command array with JSON-encoded parameters
     $command = [
         'php',
         __DIR__.'/artisan',
         'background-job:execute',
-        $class,
-        $method,
-        json_encode($params)
+        escapeshellarg($class),
+        escapeshellarg($method),
+        escapeshellarg(json_encode($params)),
+        $retryId ? escapeshellarg($retryId) : ''
     ];
 
     if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
         // Windows
         $process = new \Symfony\Component\Process\Process($command);
         $process->setOptions(['create_new_console' => true]);
+        $process->start();
     } else {
         // Unix-based systems
-        $command = 'nohup ' . implode(' ', $command) . ' > /dev/null 2>&1 &';
+        $command = implode(' ', $command) . ' > /dev/null 2>&1 &';
         $process = \Symfony\Component\Process\Process::fromShellCommandline($command);
+        $process->start();
     }
 
-    $process->start();
+    // Wait a moment to ensure the process starts
+    usleep(100000); // 100ms delay
+
     echo "Job {$className}::{$method} started successfully.\n";
     exit(0);
 

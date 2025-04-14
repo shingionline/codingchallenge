@@ -7,8 +7,6 @@
 /storage/logs/*
 !/storage/logs/background_jobs.log
 !/storage/logs/background_jobs_errors.log
-.env
-.env.backup
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml

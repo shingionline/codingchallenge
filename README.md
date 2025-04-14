@@ -89,9 +89,6 @@ if ($success) {
 #### Using the Command Line
 
 ```bash
-# Usage format
-php run-job.php className method "param1"
-
 # Example successful job
 php run-job.php SampleJob process "param1,param2,param3"
 

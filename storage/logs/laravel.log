@@ -55,3 +55,15 @@
 #52 /home/shingi/projects/codingchallenge/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('...')
 #53 {main}
 "} 
+[2025-04-14 06:33:01] local.ERROR: Not enough arguments (missing: "id"). {"exception":"[object] (Symfony\\Component\\Console\\Exception\\RuntimeException(code: 0): Not enough arguments (missing: \"id\"). at /home/shingi/projects/codingchallenge/vendor/symfony/console/Input/Input.php:69)
+[stacktrace]
+#0 /home/shingi/projects/codingchallenge/vendor/symfony/console/Command/Command.php(274): Symfony\\Component\\Console\\Input\\Input->validate()
+#1 /home/shingi/projects/codingchallenge/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run()
+#2 /home/shingi/projects/codingchallenge/vendor/symfony/console/Application.php(1094): Illuminate\\Console\\Command->run()
+#3 /home/shingi/projects/codingchallenge/vendor/symfony/console/Application.php(342): Symfony\\Component\\Console\\Application->doRunCommand()
+#4 /home/shingi/projects/codingchallenge/vendor/symfony/console/Application.php(193): Symfony\\Component\\Console\\Application->doRun()
+#5 /home/shingi/projects/codingchallenge/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(197): Symfony\\Component\\Console\\Application->run()
+#6 /home/shingi/projects/codingchallenge/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1234): Illuminate\\Foundation\\Console\\Kernel->handle()
+#7 /home/shingi/projects/codingchallenge/artisan(16): Illuminate\\Foundation\\Application->handleCommand()
+#8 {main}
+"} 

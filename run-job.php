@@ -68,7 +68,6 @@ try {
     
     echo "Job failed: " . $e->getMessage() . "\n";
     if ($status === 'running') {
-        echo "Job will be retried when you run 'php artisan background-job:process-retries'.\n";
         echo "Current attempt: {$retry->attempt} of {$retry->max_attempts}\n";
     } else {
         echo "Job has reached maximum attempts and will not be retried.\n";

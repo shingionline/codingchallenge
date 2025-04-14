@@ -14,3 +14,6 @@
 [2025-04-13 20:20:35] local.INFO: Job completed successfully {"class":"App\\Jobs\\SampleJob","method":"process","params":["param1","param2","param3"]} 
 [2025-04-13 20:20:39] local.INFO: TestFailedJob started  
 [2025-04-13 20:20:39] local.ERROR: TestFailedJob failed  
+[2025-04-14 06:31:37] local.INFO: Job completed successfully {"class":"App\\Jobs\\SampleJob","method":"process","params":["param1","param2","param3"]} 
+[2025-04-14 06:32:30] local.INFO: TestFailedJob started  
+[2025-04-14 06:32:30] local.ERROR: TestFailedJob failed  

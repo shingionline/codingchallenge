@@ -3,3 +3,4 @@
 [2025-04-13 19:27:26] local.ERROR: Job failed {"class":"App\\Jobs\\TestFailedJob","method":"process","params":["param1"],"error":"TestFailedJob failed","attempt":1,"max_attempts":3} 
 [2025-04-13 19:27:45] local.ERROR: Job failed {"class":"App\\Jobs\\TestFailedJob","method":"process","params":["param1"],"error":"TestFailedJob failed","attempt":1,"max_attempts":3} 
 [2025-04-13 20:20:39] local.ERROR: Job failed {"class":"App\\Jobs\\TestFailedJob","method":"process","params":["param1","param2","param3"],"error":"TestFailedJob failed","attempt":1,"max_attempts":3} 
+[2025-04-14 06:32:30] local.ERROR: Job failed {"class":"App\\Jobs\\TestFailedJob","method":"process","params":["param1","param2","param3"],"error":"TestFailedJob failed","attempt":1,"max_attempts":3} 

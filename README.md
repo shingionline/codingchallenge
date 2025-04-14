@@ -33,20 +33,16 @@ A custom background job runner system for Laravel that allows executing PHP clas
    ```bash
    chmod +x run-job.php
    ```
-4. Set up the scheduler in your crontab
-   ```bash
-   * * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1
-   ```
 
 ## Configuration
 
-Edit `config/background-jobs.php` to:
+Edit `config/background-jobs.php` to
 
 1. Define allowed jobs and their methods
 2. Configure retry attempts and delays
 3. Set up logging paths
 
-Example configuration:
+Example configuration
 ```php
 'allowed_jobs' => [
     'App\Jobs\SampleJob' => ['allowed_methods' => ['process']],

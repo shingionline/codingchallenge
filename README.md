@@ -88,14 +88,18 @@ if ($success) {
 
 #### Using the Command Line
 
+Example successful job
 ```bash
-# Example successful job
 php run-job.php SampleJob process "param1,param2,param3"
+```
 
-# Example failed job
+Example failed job
+```bash
 php run-job.php TestFailedJob process "param1,param2,param3"
+```
 
-# On Unix-based systems (if made executable)
+On Unix-based systems (if made executable)
+```bash
 ./run-job.php SampleJob process "param1,param2"
 ```
 
